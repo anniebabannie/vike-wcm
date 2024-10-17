@@ -1,18 +1,20 @@
 export default Page
 
-import { Chapter } from '@prisma/client'
+import type { Chapter, Page } from '@prisma/client'
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useState } from 'react'
 import { useData } from '../../../renderer/useData';
 import Pages from './pages';
 import { Link } from '../../../renderer/Link';
+import type { ReturnedData } from './+data';
 
 type Inputs = {
   title: string;
 }
 
+
 function Page() {
-  const {initialChapters, initialPages, currentChapter} = useData();
+  const {initialChapters, initialPages, currentChapter} = useData<ReturnedData>();
   const [chapters, setChapters] = useState(initialChapters);
   const [pages, setPages] = useState(initialPages);
 
@@ -38,22 +40,24 @@ function Page() {
   }
 
   async function deleteChapter(id: number) {
-    const resp = await fetch(`http://localhost:3000/chapters/${id}/delete`, { 
-        method: 'DELETE'
-      })
-    const { deletedId } = await resp.json()
-    setChapters((prevChapters) => prevChapters.filter((chapter) => chapter.id !== deletedId))
+    if (confirm('Are you sure you want to delete this chapter?')) {
+      const resp = await fetch(`http://localhost:3000/chapters/${id}/delete`, { 
+          method: 'DELETE'
+        })
+      const { deletedId } = await resp.json()
+      setChapters((prevChapters) => prevChapters.filter((chapter) => chapter.id !== deletedId))
+    }
   }
 
   return (
     <div className="grid grid-cols-12 gap-4">
       <aside className="col-span-4">
         <h1>Peach Boy Comic</h1>
-        {currentChapter}
+        {currentChapter.id}
         <ul>
           {chapters?.map((chapter) => (
-            <li key={chapter.id} className="flex gap-4 justify-between">
-              <Link href={`/chapters/${chapter.id}`} className={`${(currentChapter === chapter.id.toString()) ? 'font-bold': ''}`}>{chapter.title}</Link>
+            <li key={chapter.slug} className="flex gap-4 justify-between">
+              <Link href={`/chapters/${chapter.slug}`} className={`${(currentChapter.id === chapter.id) ? 'font-bold': ''}`}>{chapter.title}</Link>
               <button onClick={() => deleteChapter(chapter.id)}>Delete</button>
             </li>
           ))}

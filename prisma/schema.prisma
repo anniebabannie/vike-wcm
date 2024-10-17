@@ -10,14 +10,17 @@ datasource db {
 model Chapter {
   id        Int      @id @default(autoincrement())
   title     String
+  slug      String   @unique
   pages     Page[]
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  @@index([slug])
 }
 
 model Page {
   id        Int      @id @default(autoincrement())
-  page_no   Int
+  pageNo    Int      @unique
   img       String
   chapterId Int
   chapter   Chapter  @relation(fields: [chapterId], references: [id])

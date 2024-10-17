@@ -17,7 +17,10 @@ export default function setRoutes(app: Express, root: string) {
       res.json({ message: `Missing title` })
     } else {
       const chapter = await prisma.chapter.create({
-        data: { title }
+        data: { 
+          title,
+          slug: slugify(title)
+        }
       })
       console.log(chapter)
       res.json({ chapter }).status(200)
@@ -59,7 +62,7 @@ export default function setRoutes(app: Express, root: string) {
         const url = await uploadImage(file, req.file.mimetype);
         page = await prisma.page.create({
           data: {
-            page_no: parseInt(req.body.page_no),
+            pageNo: parseInt(req.body.pageNo),
             img: url as string,
             chapterId: parseInt(req.body.chapterId)
           }
@@ -128,4 +131,13 @@ function getExtension(mimetype: string) {
     default:
       return '.jpg'
   }
+}
+
+function slugify(str:string) {
+  str = str.replace(/^\s+|\s+$/g, ''); // trim leading/trailing white space
+  str = str.toLowerCase(); // convert string to lowercase
+  str = str.replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
+           .replace(/\s+/g, '-') // replace spaces with hyphens
+           .replace(/-+/g, '-'); // remove consecutive hyphens
+  return str;
 }
