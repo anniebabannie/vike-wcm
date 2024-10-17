@@ -15,12 +15,16 @@ import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vike/server'
 import { root } from './root.js'
+import { PrismaClient } from '@prisma/client'
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
 
 async function startServer() {
-  const app = express()
+  const app = express();
+  app.use(express.json());
+  // Prisma client (for database)
+  const prisma = new PrismaClient()
 
   app.use(compression())
 
@@ -65,6 +69,36 @@ async function startServer() {
     res.status(httpResponse.statusCode)
     // For HTTP streams use pageContext.httpResponse.pipe() instead, see https://vike.dev/streaming
     res.send(httpResponse.body)
+  })
+
+  // -------------------- ROUTES
+
+  app.post('/chapters/new', async(req, res) => {
+    const { title } = req.body;
+    if (!title) {
+      res.json({ message: `Missing title` })
+    } else {
+      const chapter = await prisma.chapter.create({
+        data: { title }
+      })
+      console.log(chapter)
+      res.json({ chapter }).status(200)
+    }
+  })
+
+  app.delete('/chapters/:id/delete', async(req, res) => {
+    const { id } = req.params;
+    const chapter = await prisma.chapter.delete({
+      where: { id: parseInt(id) }
+    })
+
+    const deletedId = chapter.id
+    res.json({ deletedId }).status(200)
+  })
+
+  app.post('/pages/new', async(req, res) => {
+    // upload body to s3
+    const { img, page_no } = req.body;
   })
 
   const port = process.env.PORT || 3000
