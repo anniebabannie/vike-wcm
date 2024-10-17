@@ -19,6 +19,7 @@ import { PrismaClient } from '@prisma/client'
 import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
+import { readFile, readFileSync } from 'fs'
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -101,15 +102,23 @@ async function startServer() {
   })
 
   app.post('/pages/new', upload.single('file'), async(req, res) => {
-    console.log('Uploaded file:', req.file); // Should now show file details
-    console.log('Received page_no:', req.body.page_no); // Should log the page number
-
-    console.log(req.file); // undefined
-    console.log(req.files); // undefined
-    console.log(req.params); // {}
-    console.log(req.body); // {}
-    // const result = await uploadImage(req.files);
-    res.json({ message: 'ok' }).status(200)
+    if (!req.file) {
+      res.json({ message: 'no image provided' }).status(400)
+    } else {
+      const imagePath = req.file.path;
+      const file = readFileSync(imagePath);
+      if (!file) {
+        res.json({ message: 'no image found in uploads' }).status(400)
+      }
+      uploadImage(file, req.file.mimetype)
+        .then((filename) => {
+          res.json({ message: 'ok' }).status(200)
+        })
+        .catch((err) => {
+          res.json({ message: 'error uploading image' }).status(400)
+        })
+      
+    }
   })
 
   const port = process.env.PORT || 3000
@@ -118,23 +127,22 @@ async function startServer() {
 }
 
 
-export async function uploadImage(file: File) {
-  console.log(typeof file)
-  let buffer = Buffer.from(await file.arrayBuffer());
+export async function uploadImage(buffer: Buffer, mimetype: string) {
+  const ext = getExtension(mimetype)
   const filename = uuidv4();
-  const {AWS_REGION, BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY} = import.meta.env;
+  const {AWS_REGION, BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY} = process.env;
   const s3Client = new S3Client({
     endpoint: "https://fly.storage.tigris.dev",
-    region: AWS_REGION,
+    region: AWS_REGION!,
     credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+      accessKeyId: AWS_ACCESS_KEY_ID!,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY!,
     },
   });
 
   const params = {
     Bucket: BUCKET_NAME,
-    Key: filename,
+    Key: filename + ext,
     Body: buffer,
     ContentType: "image/jpeg",
   };
@@ -146,5 +154,20 @@ export async function uploadImage(file: File) {
   } catch (error) {
     console.error(error);
     return false;
+  }
+}
+
+function getExtension(mimetype: string) {
+  switch (mimetype) {
+    case 'image/jpeg':
+      return '.jpg'
+    case 'image/png':
+      return '.png'
+    case 'image/gif':
+      return '.gif'
+    case 'image/webp':
+      return 'webp'
+    default:
+      return '.jpg'
   }
 }
