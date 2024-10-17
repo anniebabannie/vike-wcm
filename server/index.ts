@@ -16,6 +16,9 @@ import compression from 'compression'
 import { renderPage } from 'vike/server'
 import { root } from './root.js'
 import { PrismaClient } from '@prisma/client'
+import multer from 'multer';
+import { v4 as uuidv4 } from 'uuid';
+import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -23,6 +26,7 @@ startServer()
 async function startServer() {
   const app = express();
   app.use(express.json());
+  const upload = multer({ dest: `${root}/uploads/` })
   // Prisma client (for database)
   const prisma = new PrismaClient()
 
@@ -96,12 +100,51 @@ async function startServer() {
     res.json({ deletedId }).status(200)
   })
 
-  app.post('/pages/new', async(req, res) => {
-    // upload body to s3
-    const { img, page_no } = req.body;
+  app.post('/pages/new', upload.single('file'), async(req, res) => {
+    console.log('Uploaded file:', req.file); // Should now show file details
+    console.log('Received page_no:', req.body.page_no); // Should log the page number
+
+    console.log(req.file); // undefined
+    console.log(req.files); // undefined
+    console.log(req.params); // {}
+    console.log(req.body); // {}
+    // const result = await uploadImage(req.files);
+    res.json({ message: 'ok' }).status(200)
   })
 
   const port = process.env.PORT || 3000
   app.listen(port)
   console.log(`Server running at http://localhost:${port}`)
+}
+
+
+export async function uploadImage(file: File) {
+  console.log(typeof file)
+  let buffer = Buffer.from(await file.arrayBuffer());
+  const filename = uuidv4();
+  const {AWS_REGION, BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY} = import.meta.env;
+  const s3Client = new S3Client({
+    endpoint: "https://fly.storage.tigris.dev",
+    region: AWS_REGION,
+    credentials: {
+      accessKeyId: AWS_ACCESS_KEY_ID,
+      secretAccessKey: AWS_SECRET_ACCESS_KEY,
+    },
+  });
+
+  const params = {
+    Bucket: BUCKET_NAME,
+    Key: filename,
+    Body: buffer,
+    ContentType: "image/jpeg",
+  };
+
+  try {
+    const command = new PutObjectCommand(params);
+    await s3Client.send(command);
+    return filename;
+  } catch (error) {
+    console.error(error);
+    return false;
+  }
 }
