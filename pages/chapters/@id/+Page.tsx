@@ -13,7 +13,7 @@ type Inputs = {
 }
 
 function Page() {
-  const {initialChapters, initialPages} = useData();
+  const {initialChapters, initialPages, currentChapter} = useData();
   const [chapters, setChapters] = useState(initialChapters);
   const [pages, setPages] = useState(initialPages);
 
@@ -66,7 +66,7 @@ function Page() {
       </aside>
       <main>
         <h1>Pages</h1>
-        <Pages initialPages={pages}/>
+        <Pages initialPages={pages} currentChapter={currentChapter}/>
       </main>
     </div>
   );

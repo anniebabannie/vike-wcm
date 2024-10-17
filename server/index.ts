@@ -20,6 +20,7 @@ import multer from 'multer';
 import { v4 as uuidv4 } from 'uuid';
 import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 import { readFile, readFileSync } from 'fs'
+import setRoutes from './routes.js'
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -27,9 +28,9 @@ startServer()
 async function startServer() {
   const app = express();
   app.use(express.json());
-  const upload = multer({ dest: `${root}/uploads/` })
-  // Prisma client (for database)
-  const prisma = new PrismaClient()
+  // const upload = multer({ dest: `${root}/uploads/` })
+  // // Prisma client (for database)
+  // const prisma = new PrismaClient()
 
   app.use(compression())
 
@@ -76,50 +77,7 @@ async function startServer() {
     res.send(httpResponse.body)
   })
 
-  // -------------------- ROUTES
-
-  app.post('/chapters/new', async(req, res) => {
-    const { title } = req.body;
-    if (!title) {
-      res.json({ message: `Missing title` })
-    } else {
-      const chapter = await prisma.chapter.create({
-        data: { title }
-      })
-      console.log(chapter)
-      res.json({ chapter }).status(200)
-    }
-  })
-
-  app.delete('/chapters/:id/delete', async(req, res) => {
-    const { id } = req.params;
-    const chapter = await prisma.chapter.delete({
-      where: { id: parseInt(id) }
-    })
-
-    const deletedId = chapter.id
-    res.json({ deletedId }).status(200)
-  })
-
-  app.post('/pages/new', upload.single('file'), async(req, res) => {
-    if (!req.file) {
-      res.json({ message: 'no image provided' }).status(400)
-    } else {
-      const imagePath = req.file.path;
-      const file = readFileSync(imagePath);
-      if (!file) {
-        res.json({ message: 'no image found in uploads' }).status(400)
-      }
-      uploadImage(file, req.file.mimetype)
-        .then((filename) => {
-          res.json({ message: 'ok' }).status(200)
-        })
-        .catch((err) => {
-          res.json({ message: 'error uploading image' }).status(400)
-        })
-      
-    }
-  })
+  setRoutes(app, root);
 
   const port = process.env.PORT || 3000
   app.listen(port)
@@ -127,47 +85,3 @@ async function startServer() {
 }
 
 
-export async function uploadImage(buffer: Buffer, mimetype: string) {
-  const ext = getExtension(mimetype)
-  const filename = uuidv4();
-  const {AWS_REGION, BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY} = process.env;
-  const s3Client = new S3Client({
-    endpoint: "https://fly.storage.tigris.dev",
-    region: AWS_REGION!,
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID!,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY!,
-    },
-  });
-
-  const params = {
-    Bucket: BUCKET_NAME,
-    Key: filename + ext,
-    Body: buffer,
-    ContentType: "image/jpeg",
-  };
-
-  try {
-    const command = new PutObjectCommand(params);
-    await s3Client.send(command);
-    return filename;
-  } catch (error) {
-    console.error(error);
-    return false;
-  }
-}
-
-function getExtension(mimetype: string) {
-  switch (mimetype) {
-    case 'image/jpeg':
-      return '.jpg'
-    case 'image/png':
-      return '.png'
-    case 'image/gif':
-      return '.gif'
-    case 'image/webp':
-      return 'webp'
-    default:
-      return '.jpg'
-  }
-}
