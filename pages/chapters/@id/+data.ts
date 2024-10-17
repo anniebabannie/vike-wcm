@@ -15,6 +15,9 @@ const data = async (pageContext: PageContextServer) => {
   const pages = await prisma.page.findMany({
     where: {
       chapterId: parseInt(pageContext.routeParams.id)
+    },
+    orderBy: {
+      page_no: 'desc'
     }
   });
   return {

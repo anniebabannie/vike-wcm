@@ -1,12 +1,11 @@
 export default Page
 
 import { Chapter } from '@prisma/client'
-// import { useData } from '../../../renderer/useData'
-// import type { Data } from './+data'
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useState } from 'react'
 import { useData } from '../../../renderer/useData';
 import Pages from './pages';
+import { Link } from '../../../renderer/Link';
 
 type Inputs = {
   title: string;
@@ -47,13 +46,14 @@ function Page() {
   }
 
   return (
-    <div className="flex gap-4">
-      <aside>
+    <div className="grid grid-cols-12 gap-4">
+      <aside className="col-span-4">
         <h1>Peach Boy Comic</h1>
+        {currentChapter}
         <ul>
           {chapters?.map((chapter) => (
-            <li key={chapter.id}>
-              <div>{chapter.title}</div>
+            <li key={chapter.id} className="flex gap-4 justify-between">
+              <Link href={`/chapters/${chapter.id}`} className={`${(currentChapter === chapter.id.toString()) ? 'font-bold': ''}`}>{chapter.title}</Link>
               <button onClick={() => deleteChapter(chapter.id)}>Delete</button>
             </li>
           ))}
@@ -64,9 +64,9 @@ function Page() {
           <button type="submit" className="rounded-md py-1.5 px-4 bg-blue-800 text-white">Add</button>
         </form>
       </aside>
-      <main>
+      <main className="col-span-8">
         <h1>Pages</h1>
-        <Pages initialPages={pages} currentChapter={currentChapter}/>
+        <Pages initialPages={initialPages} currentChapter={currentChapter}/>
       </main>
     </div>
   );

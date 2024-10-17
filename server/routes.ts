@@ -33,6 +33,16 @@ export default function setRoutes(app: Express, root: string) {
     const deletedId = chapter.id
     res.json({ deletedId }).status(200)
   })
+
+  app.put('/chapters/:id/edit', async(req, res) => {
+    const { id } = req.params;
+    const chapter = await prisma.chapter.update({
+      where: { id: parseInt(id) },
+      data: { title: 'edited title' }
+    })
+    const editedId = chapter.id
+    res.json({ editedId }).status(200)
+  })
   
   app.post('/pages/new', upload.single('file'), async(req, res) => {
     let page: Page | null = null;
