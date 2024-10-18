@@ -13,7 +13,7 @@ type ExtendedComic = Comic & {
 };
 
 function Page() {
-  const { comic, currentChapter, currentPage, pages } = useData<{ comic: ExtendedComic, currentChapter: string, currentPage: PrismaPage, pages: PrismaPage[]}>();
+  const { comic, currentChapter, currentPage, pages } = useData<{ comic: ExtendedComic, currentChapter: Chapter, currentPage: PrismaPage, pages: PrismaPage[]}>();
   console.log(currentPage)
   return (
     <>
@@ -23,11 +23,11 @@ function Page() {
         
         <ul>
           {comic.chapters.map((chapter, index) => (
-            <li key={index} className={`${(chapter.slug == currentChapter) ? 'font-bold' : ''} hover:bg-gray-100`}>
-              {chapter.slug === currentChapter &&
+            <li key={index} className={`${(chapter.slug == currentChapter.slug) ? 'font-bold' : ''} hover:bg-gray-100`}>
+              {chapter.slug === currentChapter .slug&&
                 <p>{chapter.title}</p>
               }
-              {chapter.slug !== currentChapter &&
+              {chapter.slug !== currentChapter.slug &&
                 <a href={`/${chapter.slug}`}>{chapter.title}</a>
               }
             </li>
@@ -40,13 +40,12 @@ function Page() {
       </aside>
       <main className="col-span-8">
         <ChapterPagination totalPages={pages.length} currentPage={currentPage} currentChapter={currentChapter} />
-        {/* <PaginatedItems itemsPerPage={1} items={pages} /> */}
       </main>
     </>
   )
 }
 
-function ChapterPagination({ totalPages, currentPage, currentChapter }) {
+function ChapterPagination({ totalPages, currentPage, currentChapter }: { totalPages: number, currentPage: PrismaPage, currentChapter: Chapter }) {
 
   return (
     <div className="pagination">

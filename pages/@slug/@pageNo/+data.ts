@@ -31,9 +31,7 @@ const data = async (pageContext: PageContextServer) => {
   const paginatedPages = pages.slice(startIndex, endIndex);
   const totalPagePages = Math.ceil(pages.length / pagesShown);
   const currentChapter = comic.chapters.filter((chapter) => chapter.slug === pageContext.routeParams.slug)[0];
-  console.log("currentChapter", currentChapter)
   const currentPage = currentChapter.pages.filter((page) => page.pageNo === pageNo)[0];
-  console.log("currentPage", currentPage)
   
   return { 
     comic, 
