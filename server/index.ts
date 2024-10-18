@@ -15,12 +15,9 @@ import express from 'express'
 import compression from 'compression'
 import { renderPage } from 'vike/server'
 import { root } from './root.js'
-import { PrismaClient } from '@prisma/client'
-import multer from 'multer';
-import { v4 as uuidv4 } from 'uuid';
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
-import { readFile, readFileSync } from 'fs'
 import setRoutes from './routes.js'
+import cookieParser from 'cookie-parser'
+import authenticateJWTFromCookie from './middleware/auth.js'
 const isProduction = process.env.NODE_ENV === 'production'
 
 startServer()
@@ -28,10 +25,7 @@ startServer()
 async function startServer() {
   const app = express();
   app.use(express.json());
-  // const upload = multer({ dest: `${root}/uploads/` })
-  // // Prisma client (for database)
-  // const prisma = new PrismaClient()
-
+  app.use(cookieParser());
   app.use(compression())
 
   // Vite integration
@@ -60,11 +54,14 @@ async function startServer() {
 
   // Vike middleware. It should always be our last middleware (because it's a
   // catch-all middleware superseding any middleware placed after it).
-  app.get('*', async (req, res) => {
+  app.get('*', authenticateJWTFromCookie, async (req, res) => {
+    const user = req.user;
     const pageContextInit = {
       urlOriginal: req.originalUrl,
-      headersOriginal: req.headers
+      headersOriginal: req.headers,
+      user,
     }
+    console.log( user)
     const pageContext = await renderPage(pageContextInit)
     if (pageContext.errorWhileRendering) {
       // Install error tracking here, see https://vike.dev/error-tracking

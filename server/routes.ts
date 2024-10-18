@@ -1,143 +1,52 @@
 import { Page, PrismaClient } from "@prisma/client";
 import multer from "multer";
 import express from 'express'
-import { readFileSync } from "fs";
-import { PutObjectCommand, S3Client } from "@aws-sdk/client-s3";
 type Express = ReturnType<typeof express>
-import { v4 as uuidv4 } from 'uuid';
+import pagesIdDelete from "./routes/pages-@id-delete.js";
+import authLogin from "./routes/auth-login.js";
+import pagesNew from "./routes/pages-new.js";
+import chaptersIdEdit from "./routes/chapters-@id-edit.js";
+import chaptersIdDelete from "./routes/chapters-@id-delete.js";
+import chaptersNew from "./routes/chapters-new.js";
+import authLogout from "./routes/auth-logout.js";
+
+function setAuthRoutes(app: Express, root: string, prisma: PrismaClient) {
+  app.post('/auth/login', async (req, res) => {
+    authLogin(req, res, prisma);
+  });
+}
 
 export default function setRoutes(app: Express, root: string) {
-  const upload = multer({ dest: `${root}/uploads/` })
   // Prisma client (for database)
   const prisma = new PrismaClient()
+  const upload = multer({ dest: `${root}/uploads/` })
+
+  app.post('/auth/logout', async (req, res) => {
+    console.log('logouttttttttt')
+    authLogout(req, res);
+  })
+
+  app.post('/auth/login', async (req, res) => {
+    authLogin(req, res, prisma);
+  });
 
   app.post('/chapters/new', async(req, res) => {
-    const { title } = req.body;
-    if (!title) {
-      res.json({ message: `Missing title` })
-    } else {
-      const chapter = await prisma.chapter.create({
-        data: { 
-          title,
-          slug: slugify(title)
-        }
-      })
-      console.log(chapter)
-      res.json({ chapter }).status(200)
-    }
+    chaptersNew(req, res, prisma);
   })
   
   app.delete('/chapters/:id/delete', async(req, res) => {
-    const { id } = req.params;
-    const chapter = await prisma.chapter.delete({
-      where: { id: parseInt(id) }
-    })
-  
-    const deletedId = chapter.id
-    res.json({ deletedId }).status(200)
+    chaptersIdDelete(req, res, prisma);
   })
 
   app.put('/chapters/:id/edit', async(req, res) => {
-    const { id } = req.params;
-    const chapter = await prisma.chapter.update({
-      where: { id: parseInt(id) },
-      data: { title: 'edited title' }
-    })
-    const editedId = chapter.id
-    res.json({ editedId }).status(200)
+    chaptersIdEdit(req, res, prisma);
   })
   
   app.post('/pages/new', upload.single('file'), async(req, res) => {
-    let page: Page | null = null;
-    if (!req.file) {
-      res.json({ message: 'no image provided' }).status(400)
-    } else {
-      const imagePath = req.file.path;
-      const file = readFileSync(imagePath);
-      if (!file) {
-        res.json({ message: 'no image found in uploads' }).status(400)
-      }
-
-      try {
-        const url = await uploadImage(file, req.file.mimetype);
-        page = await prisma.page.create({
-          data: {
-            pageNo: parseInt(req.body.pageNo),
-            img: url as string,
-            chapterId: parseInt(req.body.chapterId)
-          }
-        })
-        console.log("made the page")
-          console.log(page)
-          res.json({ page }).status(200)
-        } catch (error) {
-        res.json({ error }).status(400)
-      }
-    }
+    pagesNew(req, res, prisma);
   })
 
   app.delete('/pages/:id/delete', async(req, res) => {
-    const { id } = req.params;
-    try {
-      const page = await prisma.page.delete({
-        where: { id: parseInt(id) }
-      })
-      res.json({ deletedId: page.id }).status(200)
-    } catch (error) {
-      res.json({ error }).status(400)
-    }
+    pagesIdDelete(req as typeof req, res, prisma);
   })
-}
-
-export async function uploadImage(buffer: Buffer, mimetype: string): Promise<string | undefined> {
-  const ext = getExtension(mimetype)
-  const filename = uuidv4() + ext;
-  const {AWS_REGION, BUCKET_NAME, AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY} = process.env;
-  const s3Client = new S3Client({
-    endpoint: "https://fly.storage.tigris.dev",
-    region: AWS_REGION!,
-    credentials: {
-      accessKeyId: AWS_ACCESS_KEY_ID!,
-      secretAccessKey: AWS_SECRET_ACCESS_KEY!,
-    },
-  });
-
-  const params = {
-    Bucket: BUCKET_NAME,
-    Key: filename,
-    Body: buffer,
-    ContentType: mimetype,
-  };
-
-  try {
-    const command = new PutObjectCommand(params);
-    await s3Client.send(command);
-    return `https://fly.storage.tigris.dev/${BUCKET_NAME}/${filename}`;
-  } catch (error) {
-    console.error(error);
-  }
-}
-
-function getExtension(mimetype: string) {
-  switch (mimetype) {
-    case 'image/jpeg':
-      return '.jpg'
-    case 'image/png':
-      return '.png'
-    case 'image/gif':
-      return '.gif'
-    case 'image/webp':
-      return '.webp'
-    default:
-      return '.jpg'
-  }
-}
-
-function slugify(str:string) {
-  str = str.replace(/^\s+|\s+$/g, ''); // trim leading/trailing white space
-  str = str.toLowerCase(); // convert string to lowercase
-  str = str.replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
-           .replace(/\s+/g, '-') // replace spaces with hyphens
-           .replace(/-+/g, '-'); // remove consecutive hyphens
-  return str;
 }

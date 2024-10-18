@@ -7,6 +7,7 @@ import { useData } from '../../../renderer/useData';
 import Pages from './pages';
 import { Link } from '../../../renderer/Link';
 import type { ReturnedData } from './+data';
+import { reload } from 'vike/client/router'
 
 type Inputs = {
   title: string;
@@ -17,6 +18,11 @@ function Page() {
   const {initialChapters, initialPages, currentChapter} = useData<ReturnedData>();
   const [chapters, setChapters] = useState(initialChapters);
   const [pages, setPages] = useState(initialPages);
+
+  async function logout() {
+    await fetch('/auth/logout', { method: 'POST' })
+    await reload()
+  }
 
   const {
     register,
@@ -52,6 +58,7 @@ function Page() {
   return (
     <div className="grid grid-cols-12 gap-4">
       <aside className="col-span-4">
+      <button onClick={logout}>Logout</button>
         <h1>Peach Boy Comic</h1>
         {currentChapter.id}
         <ul>

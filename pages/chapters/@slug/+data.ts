@@ -10,7 +10,7 @@ import { Chapter, Page, PrismaClient } from '@prisma/client'
 export type ReturnedData = {
   initialChapters: Chapter[],
   initialPages: Page[],
-  currentChapter: Chapter
+  currentChapter: Chapter,
 }
 
 // eslint-disable-next-line @typescript-eslint/no-unused-vars
