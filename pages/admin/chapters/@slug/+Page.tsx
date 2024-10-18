@@ -13,7 +13,6 @@ type Inputs = {
   title: string;
 }
 
-
 function Page() {
   const {initialChapters, initialPages, currentChapter} = useData<ReturnedData>();
   const [chapters, setChapters] = useState(initialChapters);

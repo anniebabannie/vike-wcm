@@ -1,6 +1,7 @@
 import { PrismaClient } from "@prisma/client";
 import { PageContextServer } from "vike/types"
 import type { Comic, Chapter, Page, Prisma } from "@prisma/client";
+import { redirect } from "vike/abort";
 
 const data = async (pageContext: PageContextServer) => {
   return getChapterPages({
@@ -9,7 +10,7 @@ const data = async (pageContext: PageContextServer) => {
   });
 }
 
-export async function getChapterPages({pageNo, currentChapterSlug}:{pageNo:number | null, currentChapterSlug: string}) {
+export async function getChapterPages({pageNo, currentChapterSlug}:{pageNo:number | null, currentChapterSlug: string | null}) {
   const prisma = new PrismaClient()
   
   const comic = await prisma.comic.findUnique({
@@ -31,6 +32,15 @@ export async function getChapterPages({pageNo, currentChapterSlug}:{pageNo:numbe
   });
   
   if (!comic) return { notFound: true }
+  
+  if (currentChapterSlug === null) {
+    const currentChapter = comic.chapters[0];
+    if (!currentChapter) return { notFound: true };
+    currentChapterSlug = currentChapter.slug;
+    const firstPage = currentChapter.pages[currentChapter.pages.length - 1];
+    throw redirect(`/${currentChapter.slug}/${firstPage.pageNo}`);
+  }
+
   if (pageNo === null) {
     const currentChapter = comic.chapters.find((chapter) => chapter.slug === currentChapterSlug);
     if (!currentChapter || currentChapter.pages.length === 0) return { notFound: true };

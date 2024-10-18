@@ -1,7 +1,6 @@
 import { PrismaClient } from "@prisma/client";
 import { PageContextServer } from "vike/types"
 import type { Comic, Chapter, Page, Prisma } from "@prisma/client";
-import { getChapterPages } from "./@pageNo/+data";
 import { redirect } from "vike/abort";
 
 const data = async (pageContext: PageContextServer) => {

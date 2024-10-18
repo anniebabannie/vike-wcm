@@ -45,7 +45,7 @@ function Page() {
   )
 }
 
-function ChapterPagination({ totalPages, currentPage, currentChapter }: { totalPages: number, currentPage: PrismaPage, currentChapter: Chapter }) {
+export function ChapterPagination({ totalPages, currentPage, currentChapter }: { totalPages: number, currentPage: PrismaPage, currentChapter: Chapter }) {
 
   return (
     <div className="pagination">

@@ -2,6 +2,8 @@ import { reload } from 'vike/client/router'
 import { useData } from '../../renderer/useData';
 import { Chapter, Comic, Page as PrismaPage } from '@prisma/client';
 import ReactPaginate from 'react-paginate';
+import MyFirstGrid from '../admin/chapters/GridDnd';
+import { ChapterPagination } from '../@slug/@pageNo/+Page';
 
 export { Page }
 
@@ -37,11 +39,7 @@ function Page() {
         }}>Logout</button>
       </aside>
       <main className="col-span-8">
-        <a href={`/${currentChapter.slug}/${currentPage.pageNo - 1}`}>Previous</a>
-        <a href={`/${currentChapter.slug}/${currentPage.pageNo + 1}`}>Next</a>
-        <a href={`/${currentChapter.slug}/${currentPage.pageNo + 1}`}>
-          <img src={currentPage.img} alt="" />
-        </a>
+        <ChapterPagination totalPages={pages.length} currentPage={currentPage} currentChapter={currentChapter} />
       </main>
     </>
   )
