@@ -22,7 +22,6 @@ export default function setRoutes(app: Express, root: string) {
   const upload = multer({ dest: `${root}/uploads/` })
 
   app.post('/auth/logout', async (req, res) => {
-    console.log('logouttttttttt')
     authLogout(req, res);
   })
 
@@ -30,23 +29,23 @@ export default function setRoutes(app: Express, root: string) {
     authLogin(req, res, prisma);
   });
 
-  app.post('/chapters/new', async(req, res) => {
+  app.post('/admin/chapters/new', async(req, res) => {
     chaptersNew(req, res, prisma);
   })
   
-  app.delete('/chapters/:id/delete', async(req, res) => {
+  app.delete('/admin/chapters/:id/delete', async(req, res) => {
     chaptersIdDelete(req, res, prisma);
   })
 
-  app.put('/chapters/:id/edit', async(req, res) => {
+  app.put('/admin/chapters/:id/edit', async(req, res) => {
     chaptersIdEdit(req, res, prisma);
   })
   
-  app.post('/pages/new', upload.single('file'), async(req, res) => {
+  app.post('/admin/pages/new', upload.single('file'), async(req, res) => {
     pagesNew(req, res, prisma);
   })
 
-  app.delete('/pages/:id/delete', async(req, res) => {
+  app.delete('/admin/pages/:id/delete', async(req, res) => {
     pagesIdDelete(req as typeof req, res, prisma);
   })
 }

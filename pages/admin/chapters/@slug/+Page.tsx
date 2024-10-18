@@ -3,11 +3,11 @@ export default Page
 import type { Chapter, Page } from '@prisma/client'
 import { SubmitHandler, useForm } from "react-hook-form";
 import { useState } from 'react'
-import { useData } from '../../../renderer/useData';
 import Pages from './pages';
-import { Link } from '../../../renderer/Link';
 import type { ReturnedData } from './+data';
 import { reload } from 'vike/client/router'
+import { Link } from '../../../../renderer/Link';
+import { useData } from '../../../../renderer/useData';
 
 type Inputs = {
   title: string;
@@ -33,7 +33,7 @@ function Page() {
   } = useForm<Inputs>()
   const onSubmit: SubmitHandler<Inputs> = async (data) => {
 
-    const resp = await fetch('http://localhost:3000/chapters/new', { 
+    const resp = await fetch('http://localhost:3000/admin/chapters/new', { 
         method: 'POST', 
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
@@ -47,7 +47,7 @@ function Page() {
 
   async function deleteChapter(id: number) {
     if (confirm('Are you sure you want to delete this chapter?')) {
-      const resp = await fetch(`http://localhost:3000/chapters/${id}/delete`, { 
+      const resp = await fetch(`http://localhost:3000/admin/chapters/${id}/delete`, { 
           method: 'DELETE'
         })
       const { deletedId } = await resp.json()
@@ -56,7 +56,7 @@ function Page() {
   }
 
   return (
-    <div className="grid grid-cols-12 gap-4">
+    <>
       <aside className="col-span-4">
       <button onClick={logout}>Logout</button>
         <h1>Peach Boy Comic</h1>
@@ -64,7 +64,7 @@ function Page() {
         <ul>
           {chapters?.map((chapter) => (
             <li key={chapter.slug} className="flex gap-4 justify-between">
-              <Link href={`/chapters/${chapter.slug}`} className={`${(currentChapter.id === chapter.id) ? 'font-bold': ''}`}>{chapter.title}</Link>
+              <Link href={`/admin/chapters/${chapter.slug}`} className={`${(currentChapter.id === chapter.id) ? 'font-bold': ''}`}>{chapter.title}</Link>
               <button onClick={() => deleteChapter(chapter.id)}>Delete</button>
             </li>
           ))}
@@ -79,7 +79,7 @@ function Page() {
         <h1>Pages</h1>
         <Pages initialPages={initialPages} currentChapter={currentChapter}/>
       </main>
-    </div>
+    </>
   );
 };
 

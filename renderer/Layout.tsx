@@ -12,7 +12,9 @@ function Layout({ children, pageContext }: { children: React.ReactNode; pageCont
   return (
     <React.StrictMode>
       <PageContextProvider pageContext={pageContext}>
-          <div className="max-w-5xl mx-auto">{children}</div>
+          <div className="max-w-5xl mx-auto grid grid-cols-12 gap-4">
+            {children}
+          </div>
       </PageContextProvider>
     </React.StrictMode>
   )

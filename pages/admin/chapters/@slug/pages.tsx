@@ -33,7 +33,7 @@ const Pages = ({ initialPages, currentChapter }: {
     formData.append('pageNo', data.pageNo.toString());
     formData.append('chapterId', currentChapter.id.toString());
 
-    const resp = await fetch('http://localhost:3000/pages/new', { 
+    const resp = await fetch('http://localhost:3000/admin/pages/new', { 
         method: 'POST', 
         body: formData,
     })
@@ -43,7 +43,7 @@ const Pages = ({ initialPages, currentChapter }: {
   }
 
   async function handleDelete(id: number) {
-    const resp = await fetch(`http://localhost:3000/pages/${id}/delete`, { 
+    const resp = await fetch(`http://localhost:3000/admin/pages/${id}/delete`, { 
         method: 'DELETE'
       })
     const { deletedId } = await resp.json()
