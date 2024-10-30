@@ -17,13 +17,19 @@ function Page() {
   console.log(currentPage)
   return (
     <>
-      <aside className="col-span-4">
-        <h2>{comic.name}</h2>
-        <p>{comic.desc}</p>
+      <aside className="col-span-4 flex flex-col">
+        <header className="mb-12">
+          <h1 className="text-3xl font-bold">{comic.name}</h1>
+          <h2 className="italic text-xl">{comic.desc}</h2>
+          <button className="text-blue-600 py-3" onClick={async () => {
+            await fetch('/auth/logout', { method: 'POST' })
+            await reload()
+          }}>Logout</button>
+        </header>
         
-        <ul>
+        <ul className="flex flex-col gap-0.5">
           {comic.chapters.map((chapter, index) => (
-            <li key={index} className={`${(chapter.slug == currentChapter.slug) ? 'font-bold' : ''} hover:bg-gray-100`}>
+            <li key={index} className={`${(chapter.slug == currentChapter.slug) ? 'font-bold' : ''} hover:bg-gray-100 py-2 px-3 -ml-3 rounded-sm`}>
               {chapter.slug === currentChapter .slug&&
                 <p>{chapter.title}</p>
               }
@@ -33,10 +39,6 @@ function Page() {
             </li>
           ))}
         </ul>
-        <button onClick={async () => {
-          await fetch('/auth/logout', { method: 'POST' })
-          await reload()
-        }}>Logout</button>
       </aside>
       <main className="col-span-8">
         <ChapterPagination totalPages={pages.length} currentPage={currentPage} currentChapter={currentChapter} />

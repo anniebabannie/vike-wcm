@@ -8,13 +8,14 @@ import type { ReturnedData } from './+data';
 import { reload } from 'vike/client/router'
 import { Link } from '../../../../renderer/Link';
 import { useData } from '../../../../renderer/useData';
+import ComicHeader from '../../../../renderer/components/ComicHeader';
 
 type Inputs = {
   title: string;
 }
 
 function Page() {
-  const {initialChapters, initialPages, currentChapter} = useData<ReturnedData>();
+  const {initialChapters, initialPages, currentChapter, comic} = useData<ReturnedData>();
   const [chapters, setChapters] = useState(initialChapters);
   const [pages, setPages] = useState(initialPages);
 
@@ -57,9 +58,7 @@ function Page() {
   return (
     <>
       <aside className="col-span-4">
-      <button onClick={logout}>Logout</button>
-        <h1>Peach Boy Comic</h1>
-        {currentChapter.id}
+        <ComicHeader comic={comic}/>
         <ul>
           {chapters?.map((chapter) => (
             <li key={chapter.slug} className="flex gap-4 justify-between">

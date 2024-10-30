@@ -1,3 +1,5 @@
+import { Chapter, Comic, Page } from "@prisma/client"
+
 // https://vike.dev/pageContext#typescript
 declare global {
   namespace Vike {
@@ -21,5 +23,13 @@ declare global {
   }
 }
 
+type ExtendedComic = Comic & {
+  chapters: (Chapter & {
+    pages: Page[];
+  })[];
+};
+
 // Tell TypeScript this file isn't an ambient module
-export {}
+export {
+  ExtendedComic
+}

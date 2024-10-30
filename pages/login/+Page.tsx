@@ -1,4 +1,6 @@
 import { useForm } from 'react-hook-form';
+import { redirect } from 'vike/abort';
+import { navigate } from 'vike/client/router';
 
 export default function Page() {
 
@@ -15,6 +17,7 @@ export default function Page() {
       .then(response => response.json())
       .then(result => {
         console.log('Success:', result);
+        throw navigate('/admin/chapters/chapter-1')
       })
       .catch(error => {
         console.error('Error:', error);
