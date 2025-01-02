@@ -28,7 +28,7 @@ function Page() {
       .then(response => response.json())
       .then(result => {
         console.log('Success:', result);
-        // throw navigate('/admin/chapters/chapter-1')
+        throw navigate('/dashboard')
       })
       .catch(error => {
         console.error('Error:', error);
