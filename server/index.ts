@@ -61,7 +61,6 @@ async function startServer() {
       headersOriginal: req.headers,
       user,
     }
-    console.log( user)
     const pageContext = await renderPage(pageContextInit)
     if (pageContext.errorWhileRendering) {
       // Install error tracking here, see https://vike.dev/error-tracking

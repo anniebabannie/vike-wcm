@@ -27,8 +27,6 @@ export async function guard(pageContext: PageContextServer) {
     if (!chapter.comic) {
       throw render(404, 'Comic not found')
     }
-
-    console.log(chapter.comic.userId, pageContext.user.userId);
     
     if (chapter.comic.userId !== userId) {
       redirect('/')

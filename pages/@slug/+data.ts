@@ -14,7 +14,6 @@ const data = async (pageContext: PageContextServer) => {
   
   if (currentChapter && currentChapter.pages.length > 0) {
     const firstPage = currentChapter.pages[0];
-    console.log(firstPage)
     throw redirect(`/${currentChapter.slug}/${firstPage.pageNo}`);
   }
 }

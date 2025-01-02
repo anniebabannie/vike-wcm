@@ -14,7 +14,6 @@ type ExtendedComic = Comic & {
 
 function Page() {
   const { comic, currentChapter, currentPage, pages } = useData<{ comic: ExtendedComic, currentChapter: Chapter, currentPage: PrismaPage, pages: PrismaPage[]}>();
-  console.log(currentPage)
   return (
     <>
       <aside className="col-span-4 flex flex-col">

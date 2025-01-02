@@ -9,6 +9,7 @@ import chaptersIdEdit from "./routes/chapters-@id-edit.js";
 import chaptersIdDelete from "./routes/chapters-@id-delete.js";
 import chaptersNew from "./routes/chapters-new.js";
 import authLogout from "./routes/auth-logout.js";
+import comicsCreate from "./routes/comics-create.js";
 
 function setAuthRoutes(app: Express, root: string, prisma: PrismaClient) {
   app.post('/auth/login', async (req, res) => {
@@ -28,6 +29,10 @@ export default function setRoutes(app: Express, root: string) {
   app.post('/auth/login', async (req, res) => {
     authLogin(req, res, prisma);
   });
+
+  app.post('/comics/create', async (req, res) => {
+    comicsCreate(req, res, prisma);
+  })
 
   app.post('/admin/chapters/new', async(req, res) => {
     chaptersNew(req, res, prisma);

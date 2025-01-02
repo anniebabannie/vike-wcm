@@ -36,6 +36,7 @@ model Comic {
   chapters    Chapter[]
   desc        String?
   userId      String
+  slug        String? @unique
   user        User     @relation(fields: [userId], references: [id])
 }
 
