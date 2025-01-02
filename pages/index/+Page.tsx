@@ -1,8 +1,6 @@
 import { reload } from 'vike/client/router'
 import { useData } from '../../renderer/useData';
 import { Chapter, Comic, Page as PrismaPage } from '@prisma/client';
-import ReactPaginate from 'react-paginate';
-import MyFirstGrid from '../admin/chapters/GridDnd';
 import { ChapterPagination } from '../@slug/@pageNo/+Page';
 
 export { Page }
@@ -14,7 +12,7 @@ type ExtendedComic = Comic & {
 };
 
 function Page() {
-  const { comic, currentChapter, currentPage, pages } = useData<{ comic: ExtendedComic, currentChapter: Chapter[], currentPage: PrismaPage}>();
+  const { comic, currentChapter, currentPage, pages } = useData<{ comic: ExtendedComic, currentChapter: Chapter, currentPage: PrismaPage, pages: PrismaPage[]}>();
   return (
     <>
       <aside className="col-span-4">
@@ -39,7 +37,9 @@ function Page() {
         }}>Logout</button>
       </aside>
       <main className="col-span-8">
+        {pages &&
         <ChapterPagination totalPages={pages.length} currentPage={currentPage} currentChapter={currentChapter} />
+        }
       </main>
     </>
   )
