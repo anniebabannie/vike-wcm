@@ -10,6 +10,7 @@ export default async function authLogin(req: Request, res: Response, prisma: Pri
     }
 
     try {
+      console.log('email:', email);
       const user = await prisma.user.findUnique({ where: { email } });
       if (!user) {
         return res.status(401).json({ message: 'Invalid email or password' });
