@@ -4,6 +4,7 @@ import { useForm, SubmitHandler } from "react-hook-form";
 import { usePageContext } from "../../../../renderer/usePageContext";
 import { ReturnedData } from "./+data";
 import { useData } from "../../../../renderer/useData";
+import { navigate } from "vike/client/router";
 
 const NewComicPage = () => {
   const { userId } = useData<ReturnedData>();
@@ -26,6 +27,7 @@ const NewComicPage = () => {
         },
         body: JSON.stringify({...data, userId})
       })
+      navigate('/dashboard')
     } catch(e) {
       console.error(e);
     }
