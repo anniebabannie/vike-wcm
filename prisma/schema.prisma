@@ -19,14 +19,11 @@ model Page {
 model Chapter {
   id        Int      @id @default(autoincrement())
   title     String
-  slug      String   @unique
   pages     Page[]
   comicId   String
   comic     Comic    @relation(fields: [comicId], references: [id])
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
-
-  @@index([slug])
 }
 
 

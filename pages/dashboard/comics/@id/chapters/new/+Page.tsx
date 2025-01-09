@@ -5,24 +5,29 @@ import { ReturnedData } from "./+data";
 
 const NewChapterPage = () => {
   const {comicId} = useData<ReturnedData>();
-  const pageContext = usePageContext()
   const { register, handleSubmit, formState: { errors } } = useForm();
-  const onSubmit = (data: any) => {
-    console.log(data);
-    fetch('/comics/chapters/new', {
-      method: 'POST',
-      headers: {
-      'Content-Type': 'application/json',
-      },
-      body: JSON.stringify(data),
-    })
-    .then(response => response.json())
-    .then(result => {
+  const onSubmit = async (data: any) => {
+    const formData = new FormData();
+    formData.append('comicId', comicId);
+    formData.append('title', data.title);
+    
+    // Append each file to the FormData
+    const files = data.pages;
+    for (let i = 0; i < files.length; i++) {
+      formData.append('pages', files[i]);
+    }
+
+    try {
+      const response = await fetch('/comics/chapters/new', {
+        method: 'POST',
+        body: formData, // Don't set Content-Type header - browser will set it with boundary
+      });
+      const result = await response.json();
       console.log('Success:', result);
-    })
-    .catch(error => {
+    } catch (error) {
       console.error('Error:', error);
-    });
+    }
+
   };
 
   return (
