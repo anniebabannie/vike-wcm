@@ -2,26 +2,36 @@ import { PrismaClient } from "@prisma/client";
 import { Request, Response } from "express";
 
 export default async function chaptersNew(req: Request, res: Response, prisma: PrismaClient) {
-  const { title } = req.body;
-  if (!title) {
-    res.json({ message: `Missing title` })
-  } else {
-    const chapter = await prisma.chapter.create({
-      data: { 
+  const { comicId, title } = req.body;
+  const files = req.files as Express.Multer.File[];
+  
+  try {
+    // Add a new Chapter to the Comic with this id
+    const newChapter = await prisma.chapter.create({
+      data: {
         title,
-        slug: slugify(title)
-      }
-    })
-    console.log(chapter)
-    res.json({ chapter }).status(200)
+        comicId,
+      },
+    });
+  
+    // Upload files to the /data directory
+    const uploadPromises = files.map((file) => {
+      const filePath = `/data/${file.originalname}`;
+      return new Promise<void>((resolve, reject) => {
+        fs.writeFile(filePath, file.buffer, (err) => {
+          if (err) {
+            reject(err);
+          } else {
+            resolve();
+          }
+        });
+      });
+    });
+  
+    await Promise.all(uploadPromises);
+  
+    res.status(201).json({ message: "Chapter created successfully", chapter: newChapter });
+  } catch (error) {
+    res.status(500).json({ error: "An error occurred while creating the chapter" });
   }
-}
-
-function slugify(str:string) {
-  str = str.replace(/^\s+|\s+$/g, ''); // trim leading/trailing white space
-  str = str.toLowerCase(); // convert string to lowercase
-  str = str.replace(/[^a-z0-9 -]/g, '') // remove any non-alphanumeric characters
-           .replace(/\s+/g, '-') // replace spaces with hyphens
-           .replace(/-+/g, '-'); // remove consecutive hyphens
-  return str;
 }
