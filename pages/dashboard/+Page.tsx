@@ -14,7 +14,7 @@ const DashboardPage = () => {
 
       <div className="max-w-4xl container mx-auto py-12">
         {comics.length === 0 && (
-          <div className="p-4 text-center">You don't have any comics yet. <a href="/comics/new" className="text-blue-500">Create one</a></div>
+          <div className="p-4 text-center">You don't have any comics yet. <a href="/dashboard/comics/new" className="text-blue-500">Create one</a></div>
         )}
         {comics.length > 0 && (
           <div className="flex space-x-4">
