@@ -36,7 +36,8 @@ const NewComicPage = () => {
     <>
       <TopNav currentPath="/comics/new" />
       <Wrapper>
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        Create a comic
+        {/* <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           <div>
             <label htmlFor="name" className="block text-sm font-medium text-gray-700">
               Name
@@ -89,7 +90,7 @@ const NewComicPage = () => {
               Submit
             </button>
           </div>
-        </form>
+        </form> */}
       </Wrapper>
     </>
   )
